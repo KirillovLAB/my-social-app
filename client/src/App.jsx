@@ -2,7 +2,6 @@ import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Градиенты для аватарок
 const gradients = [
   'from-pink-500 to-rose-500',
   'from-purple-500 to-indigo-500',
@@ -13,7 +12,7 @@ const gradients = [
 ];
 
 function getGradient(name) {
-  const index = name.charCodeAt(0) % gradients.length;
+  const index = (name || 'A').charCodeAt(0) % gradients.length;
   return gradients[index];
 }
 
@@ -27,14 +26,12 @@ function AuthPage({ onLogin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
     const url = isLogin ? '/api/login' : '/api/register';
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
-    
     const data = await res.json();
     if (data.success) {
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -75,26 +72,22 @@ function AuthPage({ onLogin }) {
         )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-4 bg-gray-50 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-700 transition"
-              required
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-4 bg-gray-50 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-700 transition"
-              required
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full p-4 bg-gray-50 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-700 transition"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-4 bg-gray-50 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-700 transition"
+            required
+          />
           <motion.button 
             whileTap={{ scale: 0.95 }}
             type="submit"
@@ -137,7 +130,7 @@ function PostCard({ post, onLike, currentUser }) {
       className="bg-white rounded-3xl shadow-sm p-5 mb-4 border border-gray-100/50"
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className={`w-11 h-11 bg-gradient-to-br ${getGradient(post.author?.username || 'A')} rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg`}>
+        <div className={`w-11 h-11 bg-gradient-to-br ${getGradient(post.author?.username)} rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg`}>
           {post.author?.username?.[0]?.toUpperCase() || '?'}
         </div>
         <div>
@@ -162,12 +155,10 @@ function PostCard({ post, onLike, currentUser }) {
           <span className="text-lg">{liked ? '❤️' : '🤍'}</span>
           {likeCount > 0 && <span>{likeCount}</span>}
         </motion.button>
-        
         <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition font-medium">
           <span className="text-lg">💬</span>
           Comment
         </button>
-        
         <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition font-medium ml-auto">
           <span className="text-lg">↗️</span>
           Share
@@ -177,21 +168,18 @@ function PostCard({ post, onLike, currentUser }) {
   );
 }
 
-// Форма создания поста
+// Создать пост
 function CreatePost({ onPostCreated, userId, user }) {
   const [text, setText] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-    
     await fetch('/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, text, image: '' })
     });
-    
     setText('');
     onPostCreated();
   };
@@ -200,29 +188,25 @@ function CreatePost({ onPostCreated, userId, user }) {
     <motion.div 
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-white rounded-3xl shadow-sm p-5 mb-6 border transition ${
-        isFocused ? 'border-indigo-200 shadow-md' : 'border-gray-100/50'
-      }`}
+      className="bg-white rounded-3xl shadow-sm p-5 mb-6 border border-gray-100/50"
     >
       <div className="flex gap-3">
-        <div className={`w-11 h-11 bg-gradient-to-br ${getGradient(user?.username || 'A')} rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg flex-shrink-0`}>
+        <div className={`w-11 h-11 bg-gradient-to-br ${getGradient(user?.username)} rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg flex-shrink-0`}>
           {user?.username?.[0]?.toUpperCase() || '?'}
         </div>
         <form onSubmit={handleSubmit} className="flex-1">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             placeholder="What's on your mind?"
             className="w-full p-0 border-0 resize-none focus:outline-none text-gray-700 placeholder-gray-400 text-sm"
             rows="2"
           />
           <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
             <div className="flex gap-2">
-              <span className="text-xl cursor-pointer hover:scale-110 transition">📷</span>
-              <span className="text-xl cursor-pointer hover:scale-110 transition">🎵</span>
-              <span className="text-xl cursor-pointer hover:scale-110 transition">📍</span>
+              <span className="text-xl">📷</span>
+              <span className="text-xl">🎵</span>
+              <span className="text-xl">📍</span>
             </div>
             <motion.button 
               whileTap={{ scale: 0.9 }}
@@ -243,7 +227,93 @@ function CreatePost({ onPostCreated, userId, user }) {
   );
 }
 
-// Список чатов
+// Поиск пользователей
+function UsersPage() {
+  const [search, setSearch] = useState('');
+  const [results, setResults] = useState([]);
+  const navigate = useNavigate();
+
+  const doSearch = (value) => {
+    setSearch(value);
+    if (value.length < 1) {
+      setResults([]);
+      return;
+    }
+    fetch(`/api/users/search?q=${encodeURIComponent(value)}`)
+      .then(r => r.json())
+      .then(data => setResults(data))
+      .catch(() => setResults([]));
+  };
+
+  return (
+    <div className="px-4 pt-4">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Find People</h2>
+      
+      {/* Поисковая строка */}
+      <div className="relative mb-6">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">🔍</span>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => doSearch(e.target.value)}
+          placeholder="Type username to search..."
+          className="w-full p-4 pl-12 pr-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-400 text-gray-700 shadow-sm text-base"
+        />
+        {search && (
+          <button 
+            onClick={() => doSearch('')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+      
+      {/* Результаты */}
+      <div className="space-y-2">
+        {results.map((user, i) => (
+          <motion.div
+            key={user.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.03 }}
+            onClick={() => navigate(`/chat/${user.id}`)}
+            className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100/50 cursor-pointer hover:shadow-md transition active:scale-[0.98] flex items-center gap-3"
+          >
+            <div className={`w-12 h-12 bg-gradient-to-br ${getGradient(user.username)} rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg`}>
+              {user.username[0].toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <span className="font-semibold text-gray-800">{user.username}</span>
+              <p className="text-xs text-gray-400">Tap to message</p>
+            </div>
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs px-4 py-2 rounded-xl font-semibold">
+              Chat
+            </div>
+          </motion.div>
+        ))}
+        
+        {search.length === 0 && (
+          <div className="text-center py-16">
+            <span className="text-5xl block mb-4">🔍</span>
+            <p className="text-gray-500 font-medium">Search for people</p>
+            <p className="text-gray-400 text-sm mt-1">Enter username to find and start chatting</p>
+          </div>
+        )}
+        
+        {search.length > 0 && results.length === 0 && (
+          <div className="text-center py-16">
+            <span className="text-5xl block mb-4">😕</span>
+            <p className="text-gray-500 font-medium">No users found</p>
+            <p className="text-gray-400 text-sm mt-1">Try a different username</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Чаты
 function ChatsPage({ userId }) {
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
@@ -256,7 +326,7 @@ function ChatsPage({ userId }) {
 
   return (
     <div className="px-4 pt-4">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 px-1">Messages</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Messages</h2>
       {chats.map((chat, i) => (
         <motion.div
           key={chat.userId}
@@ -283,9 +353,9 @@ function ChatsPage({ userId }) {
       ))}
       {chats.length === 0 && (
         <div className="text-center py-16">
-          <span className="text-5xl mb-4 block">💬</span>
-          <p className="text-gray-400">No messages yet</p>
-          <p className="text-gray-300 text-sm mt-1">Find users to start chatting</p>
+          <span className="text-5xl block mb-4">💬</span>
+          <p className="text-gray-500 font-medium">No messages yet</p>
+          <p className="text-gray-400 text-sm mt-1">Go to Search to find people</p>
         </div>
       )}
     </div>
@@ -297,34 +367,39 @@ function ChatPage({ userId, chatUserId }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [chatUser, setChatUser] = useState(null);
-  const messagesEndRef = useState(null);
 
   useEffect(() => {
-    fetch(`/api/users`)
+    fetch('/api/users/search?q=')
       .then(r => r.json())
-      .then(users => setChatUser(users.find(u => u.id === chatUserId)));
+      .catch(() => [])
+      .then(() => fetch('/api/users'))
+      .then(r => r.json())
+      .then(users => {
+        const found = users.find(u => u.id === chatUserId);
+        setChatUser(found || { username: 'User' });
+      })
+      .catch(() => setChatUser({ username: 'User' }));
 
     const loadMessages = () => {
       fetch(`/api/messages/${userId}/${chatUserId}`)
         .then(r => r.json())
-        .then(setMessages);
+        .then(setMessages)
+        .catch(() => {});
     };
     
     loadMessages();
-    const interval = setInterval(loadMessages, 1000);
+    const interval = setInterval(loadMessages, 1500);
     return () => clearInterval(interval);
   }, [userId, chatUserId]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-
     await fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fromUserId: userId, toUserId: chatUserId, text })
     });
-
     setText('');
     const res = await fetch(`/api/messages/${userId}/${chatUserId}`);
     setMessages(await res.json());
@@ -333,8 +408,8 @@ function ChatPage({ userId, chatUserId }) {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="bg-white/90 backdrop-blur-xl border-b border-gray-100 px-5 py-4 flex items-center gap-3">
-        <Link to="/chats" className="text-gray-400 hover:text-gray-600">← Back</Link>
-        <div className={`w-9 h-9 bg-gradient-to-br ${getGradient(chatUser?.username || 'A')} rounded-xl flex items-center justify-center font-bold text-white`}>
+        <Link to="/chats" className="text-gray-400 hover:text-gray-600 text-lg">←</Link>
+        <div className={`w-9 h-9 bg-gradient-to-br ${getGradient(chatUser?.username)} rounded-xl flex items-center justify-center font-bold text-white`}>
           {chatUser?.username?.[0]?.toUpperCase() || '?'}
         </div>
         <span className="font-semibold text-gray-800">{chatUser?.username || 'Chat'}</span>
@@ -357,11 +432,9 @@ function ChatPage({ userId, chatUserId }) {
             </div>
           </motion.div>
         ))}
-        <div ref={messagesEndRef} />
       </div>
 
       <form onSubmit={sendMessage} className="bg-white border-t border-gray-100 p-4 flex gap-3">
-        <button type="button" className="text-2xl text-gray-400">😀</button>
         <input
           type="text"
           value={text}
@@ -381,46 +454,49 @@ function ChatPage({ userId, chatUserId }) {
   );
 }
 
-// Список пользователей
-function UsersPage() {
-  const [users, setUsers] = useState([]);
-  const navigate = useNavigate();
+// Уведомления
+function NotificationsPage({ userId }) {
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    fetch('/api/users')
+    fetch(`/api/notifications/${userId}`)
       .then(r => r.json())
-      .then(setUsers);
-  }, []);
+      .then(setNotifications)
+      .catch(() => {});
+    
+    fetch(`/api/notifications/${userId}/read`, { method: 'POST' }).catch(() => {});
+  }, [userId]);
 
   return (
     <div className="px-4 pt-4">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 px-1">Discover People</h2>
-      <div className="space-y-2">
-        {users.map((user, i) => (
-          <motion.div
-            key={user.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
-            onClick={() => navigate(`/chat/${user.id}`)}
-            className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100/50 cursor-pointer hover:shadow-md transition active:scale-[0.98] flex items-center gap-3"
-          >
-            <div className={`w-12 h-12 bg-gradient-to-br ${getGradient(user.username)} rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg`}>
-              {user.username[0].toUpperCase()}
-            </div>
-            <div className="flex-1">
-              <span className="font-semibold text-gray-800">{user.username}</span>
-              <p className="text-xs text-gray-400">Tap to message</p>
-            </div>
-            <motion.button 
-              whileTap={{ scale: 0.9 }}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs px-4 py-2 rounded-xl font-semibold shadow-lg shadow-indigo-200"
-            >
-              Chat
-            </motion.button>
-          </motion.div>
-        ))}
-      </div>
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Notifications</h2>
+      {notifications.map((n, i) => (
+        <motion.div
+          key={n.id}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.03 }}
+          className={`p-4 rounded-2xl mb-3 border flex items-center gap-3 ${
+            n.read ? 'bg-white border-gray-100' : 'bg-indigo-50 border-indigo-200'
+          }`}
+        >
+          <span className="text-2xl">{n.type === 'like' ? '❤️' : '💬'}</span>
+          <div>
+            <p className={`text-sm ${n.read ? 'text-gray-600' : 'text-gray-800 font-semibold'}`}>
+              {n.text}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">Just now</p>
+          </div>
+          {!n.read && <div className="w-2 h-2 bg-indigo-500 rounded-full ml-auto" />}
+        </motion.div>
+      ))}
+      {notifications.length === 0 && (
+        <div className="text-center py-16">
+          <span className="text-5xl block mb-4">🔔</span>
+          <p className="text-gray-500 font-medium">No notifications</p>
+          <p className="text-gray-400 text-sm mt-1">You'll see likes and messages here</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -429,6 +505,7 @@ function UsersPage() {
 export default function App() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [notifCount, setNotifCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -438,7 +515,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (user) fetchPosts();
+    if (user) {
+      fetchPosts();
+      const interval = setInterval(() => {
+        fetch(`/api/notifications/${user.id}/count`)
+          .then(r => r.json())
+          .then(d => setNotifCount(d.count))
+          .catch(() => {});
+      }, 3000);
+      return () => clearInterval(interval);
+    }
   }, [user]);
 
   const fetchPosts = async () => {
@@ -471,7 +557,7 @@ export default function App() {
   const isActive = (path) => location.pathname === path;
 
   const navLinkClass = (path) => `
-    flex flex-col items-center gap-1 transition
+    flex flex-col items-center gap-1 transition relative
     ${isActive(path) ? 'text-indigo-500' : 'text-gray-400 hover:text-gray-600'}
   `;
 
@@ -479,11 +565,12 @@ export default function App() {
 
   return (
     <div className="bg-gray-50 min-h-screen max-w-lg mx-auto relative pb-20">
-      {/* Шапка */}
       <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-5 py-4 z-10 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-800">
-          {location.pathname === '/chats' ? 'Messages' : 
-           location.pathname === '/users' ? 'People' :
+          {location.pathname.startsWith('/chat/') ? 'Chat' :
+           location.pathname === '/chats' ? 'Messages' : 
+           location.pathname === '/users' ? 'Find People' :
+           location.pathname === '/notifications' ? 'Alerts' :
            location.pathname === '/profile' ? 'Profile' : 'My Net'}
         </h1>
         <button 
@@ -504,11 +591,12 @@ export default function App() {
               ))}
             </div>
           } />
-          <Route path="/chats" element={<ChatsPage userId={user.id} />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/chats" element={<ChatsPage userId={user.id} />} />
           <Route path="/chat/:chatUserId" element={
             <ChatPage userId={user.id} chatUserId={location.pathname.split('/')[2]} />
           } />
+          <Route path="/notifications" element={<NotificationsPage userId={user.id} />} />
           <Route path="/profile" element={
             <motion.div 
               initial={{ opacity: 0 }}
@@ -542,8 +630,17 @@ export default function App() {
           <span className="text-[10px] font-semibold">Feed</span>
         </Link>
         <Link to="/users" className={navLinkClass('/users')}>
-          <span className="text-2xl">👥</span>
-          <span className="text-[10px] font-semibold">People</span>
+          <span className="text-2xl">🔍</span>
+          <span className="text-[10px] font-semibold">Search</span>
+        </Link>
+        <Link to="/notifications" className={navLinkClass('/notifications')}>
+          <span className="text-2xl">🔔</span>
+          {notifCount > 0 && (
+            <span className="absolute -top-1 right-0 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold px-1">
+              {notifCount}
+            </span>
+          )}
+          <span className="text-[10px] font-semibold">Alerts</span>
         </Link>
         <Link to="/chats" className={navLinkClass('/chats')}>
           <span className="text-2xl">💬</span>
